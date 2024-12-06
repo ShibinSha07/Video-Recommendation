@@ -27,6 +27,17 @@ items={
 def index()->dict[str,dict[int,Item]]:
     return {"items":items}
 
+# @app.get("/items/{item_id}")
+# def query_item_by_id(item_id:int)->Item:
+#     if item_id not in Item:
+#         raise HTTPException(
+#             status_code=404,details=f"Item with{item_id=} does not exist"
+#         )
+#     return items[item_id]
+
+
+
+
 
 
 
