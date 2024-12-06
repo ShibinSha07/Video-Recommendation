@@ -1,72 +1,129 @@
-from enum import Enum
+from fastapi import FastAPI, Query, Header, HTTPException
+from typing import Optional, List
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+app = FastAPI()
 
-app=FastAPI()
+# Simulated data storage (for demonstration purposes)
+POSTS = [{"id": i, "title": f"Post {i}", "content": f"This is post {i}."} for i in range(1, 1001)]
+USERS = [{"id": i, "name": f"User {i}"} for i in range(1, 501)]
 
-class Category(Enum):
-    TOOLS="tools"
-    CONSUMABLES="consumables"
+# Authorization token for header validation
+AUTH_TOKEN = "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"
+
+# Helper function to fetch paginated data
+def get_paginated_data(data: List[dict], page: int, page_size: int):
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+    return data[start_index:end_index]
+
+@app.get("/posts/view")
+def get_viewed_posts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    resonance_algorithm: Optional[str] = None,
+):
+    """
+    Get all viewed posts with pagination and optional resonance algorithm.
+    """
+    paginated_posts = get_paginated_data(POSTS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "resonance_algorithm": resonance_algorithm,
+        "total_posts": len(POSTS),
+        "posts": paginated_posts,
+    }
+
+@app.get("/posts/like")
+def get_liked_posts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    resonance_algorithm: Optional[str] = None,
+):
+    """
+    Get all liked posts with pagination and optional resonance algorithm.
+    """
+    paginated_posts = get_paginated_data(POSTS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "resonance_algorithm": resonance_algorithm,
+        "total_posts": len(POSTS),
+        "posts": paginated_posts,
+    }
+
+@app.get("/posts/inspire")
+def get_inspired_posts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    resonance_algorithm: Optional[str] = None,
+):
+    """
+    Get all inspired posts with pagination and optional resonance algorithm.
+    """
+    paginated_posts = get_paginated_data(POSTS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "resonance_algorithm": resonance_algorithm,
+        "total_posts": len(POSTS),
+        "posts": paginated_posts,
+    }
+
+@app.get("/posts/rating")
+def get_rated_posts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    resonance_algorithm: Optional[str] = None,
+):
+    """
+    Get all rated posts with pagination and optional resonance algorithm.
+    """
+    paginated_posts = get_paginated_data(POSTS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "resonance_algorithm": resonance_algorithm,
+        "total_posts": len(POSTS),
+        "posts": paginated_posts,
+    }
+
+@app.get("/posts/summary/get")
+def get_all_posts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    flic_token: str = Header(None),
+):
+    """
+    Get all posts with pagination (authorization required).
+    """
+    if flic_token != AUTH_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid authorization token")
     
-class Item(BaseModel):
-    name:str
-    price:float
-    count:int
-    id:int
-    category:Category
-    
-items={
-    0:Item(name="A",price=9.99,count=20,id=0,category=Category.TOOLS),
-    1:Item(name="B",price=5.99,count=2,id=1,category=Category.TOOLS),
-    2:Item(name="C",price=3.99,count=200,id=2,category=Category.CONSUMABLES)
-}
+    paginated_posts = get_paginated_data(POSTS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "total_posts": len(POSTS),
+        "posts": paginated_posts,
+    }
 
+@app.get("/users/get_all")
+def get_all_users(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=1000),
+    flic_token: str = Header(None),
+):
+    """
+    Get all users with pagination (authorization required).
+    """
+    if flic_token != AUTH_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid authorization token")
 
-@app.get("/")
-def index()->dict[str,dict[int,Item]]:
-    return {"items":items}
-
-# @app.get("/items/{item_id}")
-# def query_item_by_id(item_id:int)->Item:
-#     if item_id not in Item:
-#         raise HTTPException(
-#             status_code=404,details=f"Item with{item_id=} does not exist"
-#         )
-#     return items[item_id]
-
-
-
-
-
-
-
-
-
-
-
-
-# from fastapi import FastAPI
-# import requests
-
-# app = FastAPI()
-
-# @app.get("/")
-# def read_root():
-#     return {"message": "Welcome to the Video Recommendation API!"}
-
-# @app.get("/feed")
-# def get_recommendations(username: str, category_id: str = None, mood: str = None):
-#     return {
-#         "username": username,
-#         "category_id": category_id,
-#         "mood": mood,
-#         "recommendations": ["Video1", "Video2", "Video3"]
-#     }
-
-# @app.get("/fetch_data")
-# def fetch_data():
-#     url = "https://api.socialverseapp.com/posts/view?page=1&page_size=1000"
-#     headers = {"Flic-Token": "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"}
-#     response = requests.get(url, headers=headers)
-#     return response.json()
+    paginated_users = get_paginated_data(USERS, page, page_size)
+    return {
+        "page": page,
+        "page_size": page_size,
+        "total_users": len(USERS),
+        "users": paginated_users,
+    }
