@@ -1,129 +1,33 @@
-from fastapi import FastAPI, Query, Header, HTTPException
-from typing import Optional, List
+# import requests
 
-app = FastAPI()
+# BASE_URL = "https://api.socialverseapp.com"
+# HEADERS = {
+#     "Flic-Token": "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"
+# }
 
-# Simulated data storage (for demonstration purposes)
-POSTS = [{"id": i, "title": f"Post {i}", "content": f"This is post {i}."} for i in range(1, 1001)]
-USERS = [{"id": i, "name": f"User {i}"} for i in range(1, 501)]
+# def fetch_data(endpoint, params):
+#     response = requests.get(f"{BASE_URL}{endpoint}", headers=HEADERS, params=params)
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         print(f"Error fetching data: {response.status_code}")
+#         return []
 
-# Authorization token for header validation
-AUTH_TOKEN = "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"
-
-# Helper function to fetch paginated data
-def get_paginated_data(data: List[dict], page: int, page_size: int):
-    start_index = (page - 1) * page_size
-    end_index = start_index + page_size
-    return data[start_index:end_index]
-
-@app.get("/posts/view")
-def get_viewed_posts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    resonance_algorithm: Optional[str] = None,
-):
-    """
-    Get all viewed posts with pagination and optional resonance algorithm.
-    """
-    paginated_posts = get_paginated_data(POSTS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "resonance_algorithm": resonance_algorithm,
-        "total_posts": len(POSTS),
-        "posts": paginated_posts,
-    }
-
-@app.get("/posts/like")
-def get_liked_posts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    resonance_algorithm: Optional[str] = None,
-):
-    """
-    Get all liked posts with pagination and optional resonance algorithm.
-    """
-    paginated_posts = get_paginated_data(POSTS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "resonance_algorithm": resonance_algorithm,
-        "total_posts": len(POSTS),
-        "posts": paginated_posts,
-    }
-
-@app.get("/posts/inspire")
-def get_inspired_posts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    resonance_algorithm: Optional[str] = None,
-):
-    """
-    Get all inspired posts with pagination and optional resonance algorithm.
-    """
-    paginated_posts = get_paginated_data(POSTS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "resonance_algorithm": resonance_algorithm,
-        "total_posts": len(POSTS),
-        "posts": paginated_posts,
-    }
-
-@app.get("/posts/rating")
-def get_rated_posts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    resonance_algorithm: Optional[str] = None,
-):
-    """
-    Get all rated posts with pagination and optional resonance algorithm.
-    """
-    paginated_posts = get_paginated_data(POSTS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "resonance_algorithm": resonance_algorithm,
-        "total_posts": len(POSTS),
-        "posts": paginated_posts,
-    }
-
-@app.get("/posts/summary/get")
-def get_all_posts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    flic_token: str = Header(None),
-):
-    """
-    Get all posts with pagination (authorization required).
-    """
-    if flic_token != AUTH_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid authorization token")
+# def fetch_paginated_data(endpoint):
+#     page = 1
+#     page_size = 1000
+#     all_data = []
     
-    paginated_posts = get_paginated_data(POSTS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "total_posts": len(POSTS),
-        "posts": paginated_posts,
-    }
+#     while True:
+#         params = {"page": page, "page_size": page_size}
+#         data = fetch_data(endpoint, params)
+#         if not data or len(data) < page_size:
+#             break
+#         all_data.extend(data)
+#         page += 1
+    
+#     return all_data
 
-@app.get("/users/get_all")
-def get_all_users(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=1000),
-    flic_token: str = Header(None),
-):
-    """
-    Get all users with pagination (authorization required).
-    """
-    if flic_token != AUTH_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid authorization token")
-
-    paginated_users = get_paginated_data(USERS, page, page_size)
-    return {
-        "page": page,
-        "page_size": page_size,
-        "total_users": len(USERS),
-        "users": paginated_users,
-    }
+# # Example usage
+# viewed_posts = fetch_paginated_data("/posts/view")
+# liked_posts = fetch_paginated_data("/posts/like")
