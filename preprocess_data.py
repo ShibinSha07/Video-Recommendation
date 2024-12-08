@@ -108,29 +108,6 @@ post_stats[['avg_likes', 'avg_inspired', 'share_ratio']] = scaler.fit_transform(
     post_stats[['avg_likes', 'avg_inspired', 'share_ratio']]
 )
 
-
-
-# # Group interactions by post_id
-# post_stats['avg_likes'] = df_liked.groupby('post_id')['user_id'].count() / df_all_posts['view_count']
-# post_stats['avg_inspired'] = df_inspired.groupby('post_id')['user_id'].count() / df_all_posts['view_count']
-# post_stats['share_ratio'] = df_all_posts['share_count'] / df_all_posts['view_count']
-
-# # print(post_stats[['avg_likes', 'avg_inspired', 'share_ratio']].describe())
-# # print(post_stats[['avg_likes', 'avg_inspired', 'share_ratio']].isna().sum())
-# # print(post_stats[['avg_likes', 'avg_inspired', 'share_ratio']].head())
-
-# df_all_posts['view_count'] = df_all_posts['view_count'].replace(0, 1)
-# post_stats.replace([np.inf, -np.inf], 0, inplace=True)
-# post_stats.fillna(0, inplace=True)
-
-# # # Fill missing values with 0 for posts with no interactions
-# post_stats.fillna(0, inplace=True)
-
-# # # Normalize post stats
-# # post_stats[['avg_likes', 'avg_inspired', 'share_ratio']] = scaler.fit_transform(
-# #     post_stats[['avg_likes', 'avg_inspired', 'share_ratio']]
-# # )
-
 # Save post stats back to MongoDB
 post_stats.reset_index(inplace=True)
 db["post_statistics"].delete_many({})
