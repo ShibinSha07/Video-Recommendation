@@ -1,33 +1,59 @@
-# import requests
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from pymongo import MongoClient
+from typing import Optional
 
-# BASE_URL = "https://api.socialverseapp.com"
-# HEADERS = {
-#     "Flic-Token": "flic_6e2d8d25dc29a4ddd382c2383a903cf4a688d1a117f6eb43b35a1e7fadbb84b8"
-# }
+app = FastAPI()
 
-# def fetch_data(endpoint, params):
-#     response = requests.get(f"{BASE_URL}{endpoint}", headers=HEADERS, params=params)
-#     if response.status_code == 200:
-#         return response.json()
-#     else:
-#         print(f"Error fetching data: {response.status_code}")
-#         return []
+# Connect to MongoDB
+client = MongoClient("mongodb+srv://tcr21cs003:1234@cluster0.7yqfh.mongodb.net/?retryWrites=true&w=majority")
+db = client["recommedn_db"]
 
-# def fetch_paginated_data(endpoint):
-#     page = 1
-#     page_size = 1000
-#     all_data = []
-    
-#     while True:
-#         params = {"page": page, "page_size": page_size}
-#         data = fetch_data(endpoint, params)
-#         if not data or len(data) < page_size:
-#             break
-#         all_data.extend(data)
-#         page += 1
-    
-#     return all_data
+class RecommendationRequest(BaseModel):
+    username: str
+    category_id: Optional[int] = None
+    mood: Optional[str] = None
 
-# # Example usage
-# viewed_posts = fetch_paginated_data("/posts/view")
-# liked_posts = fetch_paginated_data("/posts/like")
+def get_recommended_posts(username: str, category_id: Optional[int] = None, mood: Optional[str] = None, top_n: int = 10):
+    """
+    Generate recommendations based on username, category, and mood.
+
+    Args:
+        username (str): Username of the user.
+        category_id (int, optional): ID of the category user wants to see.
+        mood (str, optional): Current mood of the user.
+        top_n (int): Number of recommendations to return.
+
+    Returns:
+        list: List of recommended posts.
+    """
+    # Fetch user details
+    user = db["users"].find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Fetch recommendations based on filters
+    query = {}
+    if category_id:
+        query["category_id"] = category_id
+    if mood:
+        query["mood"] = mood
+
+    # Generate recommendations (dummy logic for now)
+    recommendations = list(db["posts"].find(query).limit(top_n))
+
+    # Return only necessary fields
+    recommended_posts = [
+        {"post_id": post["_id"], "title": post["title"], "category_id": post["category_id"], "mood": post.get("mood")}
+        for post in recommendations
+    ]
+    return recommended_posts
+
+@app.get("/feed")
+async def feed(request: RecommendationRequest):
+    recommended_posts = get_recommended_posts(request.username, request.category_id, request.mood)
+    return recommended_posts
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="localhost", port=5000)
